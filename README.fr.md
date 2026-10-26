@@ -5,6 +5,29 @@
 Hommage en **.NET 10 / Blazor WebAssembly** aux classiques Amiga **Boulder Dash** et **Emerald Mine**.
 Toute la logique du jeu est écrite en C#. Elle tourne dans le navigateur via WebAssembly, et le rendu se fait sur un `<canvas>` en pixel art généré par le code (aucun asset externe).
 
+<p align="center">
+  <img src="docs/screenshots/title.png" alt="Écran titre" width="720">
+</p>
+
+<table>
+  <tr>
+    <td><img src="docs/screenshots/gameplay.png" alt="Niveau 1 : on creuse et on ramasse les diamants"></td>
+    <td><img src="docs/screenshots/intro.png" alt="Présentation d'un niveau"></td>
+  </tr>
+  <tr>
+    <td align="center"><sub>Niveau 1 : on creuse et on ramasse les diamants</sub></td>
+    <td align="center"><sub>Présentation d'un niveau</sub></td>
+  </tr>
+  <tr>
+    <td><img src="docs/screenshots/fireflies.png" alt="Niveau 3 : une luciole enfermée dans sa boîte de briques"></td>
+    <td><img src="docs/screenshots/butterflies.png" alt="Niveau 4 : un papillon sous une rangée de rochers"></td>
+  </tr>
+  <tr>
+    <td align="center"><sub>Niveau 3 : une luciole enfermée dans sa boîte de briques</sub></td>
+    <td align="center"><sub>Niveau 4 : un papillon sous une rangée de rochers</sub></td>
+  </tr>
+</table>
+
 ## Lancer le jeu
 
 ```powershell

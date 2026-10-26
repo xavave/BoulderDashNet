@@ -7,6 +7,29 @@ All the game logic is written in C#. It runs in the browser through WebAssembly,
 
 > The in-game interface is in French.
 
+<p align="center">
+  <img src="docs/screenshots/title.png" alt="Title screen" width="720">
+</p>
+
+<table>
+  <tr>
+    <td><img src="docs/screenshots/gameplay.png" alt="Level 1: digging and collecting diamonds"></td>
+    <td><img src="docs/screenshots/intro.png" alt="Level intro card"></td>
+  </tr>
+  <tr>
+    <td align="center"><sub>Level 1: digging and collecting diamonds</sub></td>
+    <td align="center"><sub>Level intro card</sub></td>
+  </tr>
+  <tr>
+    <td><img src="docs/screenshots/fireflies.png" alt="Level 3: a firefly locked in its brick box"></td>
+    <td><img src="docs/screenshots/butterflies.png" alt="Level 4: a butterfly waiting under a row of boulders"></td>
+  </tr>
+  <tr>
+    <td align="center"><sub>Level 3: a firefly locked in its brick box</sub></td>
+    <td align="center"><sub>Level 4: a butterfly waiting under a row of boulders</sub></td>
+  </tr>
+</table>
+
 ## Running the game
 
 ```powershell
