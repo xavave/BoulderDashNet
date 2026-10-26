@@ -1,0 +1,105 @@
+﻿@page "/"
+@using BoulderDashNet.Core
+
+<PageTitle>BoulderDashNet</PageTitle>
+
+<div class="stage">
+    <div class="screen">
+        <canvas @ref="_canvas" width="640" height="416"></canvas>
+
+        @switch (State)
+        {
+            case GameState.Title:
+                <div class="overlay title">
+                    <h1 class="logo"><span>BOULDER</span><span>DASH</span><small>.NET</small></h1>
+                    <p class="tagline">Hommage aux classiques Amiga Boulder Dash &amp; Emerald Mine</p>
+                    <button class="btn primary" @onclick="() => Play(0)">▶ Jouer <kbd>Entrée</kbd></button>
+                    <div class="levels">
+                        <span class="label">Niveaux</span>
+                        @for (var i = 0; i < _game.LevelList.Count; i++)
+                        {
+                            var index = i;
+                            var locked = index > _unlockedLevel;
+                            <button class="lvl" disabled="@locked" title="@_game.LevelList[index].Name"
+                                    @onclick="() => Play(index)">@(locked ? "🔒" : (index + 1).ToString())</button>
+                        }
+                    </div>
+                    @if (_highScore > 0)
+                    {
+                        <p class="hiscore">Meilleur score : @_highScore.ToString("000000")</p>
+                    }
+                </div>
+                break;
+
+            case GameState.LevelIntro when CurrentLevel is not null:
+                <div class="overlay intro">
+                    <div class="card">
+                        <div class="lvl-num">NIVEAU @(_game.LevelIndex + 1)</div>
+                        <h2>@CurrentLevel.Name</h2>
+                        <p>@CurrentLevel.Hint</p>
+                        <p class="goal">💎 @CurrentLevel.DiamondsRequired diamants · ⏱ @CurrentLevel.TimeSeconds s</p>
+                    </div>
+                </div>
+                break;
+
+            case GameState.Paused:
+                <div class="overlay">
+                    <div class="card">
+                        <h2>PAUSE</h2>
+                        <button class="btn primary" @onclick="Resume">Reprendre <kbd>Échap</kbd></button>
+                        <button class="btn" @onclick="GiveUp">Abandonner le niveau <kbd>R</kbd></button>
+                        <button class="btn" @onclick="Menu">Menu principal</button>
+                    </div>
+                </div>
+                break;
+
+            case GameState.LevelComplete:
+                <div class="overlay intro">
+                    <div class="card">
+                        <h2>Niveau terminé !</h2>
+                        <p>Bonus temps : @_game.TimeLeftSeconds</p>
+                        <p class="goal">Score : @_game.Score.ToString("000000")</p>
+                    </div>
+                </div>
+                break;
+
+            case GameState.GameOver:
+                <div class="overlay">
+                    <div class="card">
+                        <h2 class="danger">GAME OVER</h2>
+                        <p class="goal">Score : @_game.Score.ToString("000000")</p>
+                        <button class="btn primary" @onclick="() => Play(_game.LevelIndex)">Réessayer ce niveau</button>
+                        <button class="btn" @onclick="Menu">Menu principal</button>
+                    </div>
+                </div>
+                break;
+
+            case GameState.Victory:
+                <div class="overlay">
+                    <div class="card">
+                        <h2>🏆 Bravo, mineur !</h2>
+                        <p>Toutes les cavernes sont vidées.</p>
+                        <p class="goal">Score final : @_game.Score.ToString("000000")</p>
+                        <button class="btn primary" @onclick="Menu">Menu principal</button>
+                    </div>
+                </div>
+                break;
+        }
+    </div>
+
+    <div class="help">
+        <span><kbd>←↑→↓</kbd> / <kbd>ZQSD</kbd> déplacer</span>
+        <span><kbd>Espace</kbd> + direction : ramasser sans bouger</span>
+        <span><kbd>Échap</kbd> pause</span>
+        <span><kbd>M</kbd> son</span>
+    </div>
+
+    <div class="touchpad" aria-hidden="true">
+        <button data-dir="1" class="up">▲</button>
+        <button data-dir="4" class="left">◀</button>
+        <button data-dir="2" class="right">▶</button>
+        <button data-dir="3" class="down">▼</button>
+        <button data-key="snap" class="snap">✋</button>
+        <button data-key="pause" class="pause">❚❚</button>
+    </div>
+</div>
