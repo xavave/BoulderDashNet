@@ -30,6 +30,11 @@ All the game logic is written in C#. It runs in the browser through WebAssembly,
   </tr>
 </table>
 
+<p align="center">
+  <img src="docs/screenshots/hall-of-fame-en.png" alt="Hall of Fame: the best players, shared by everyone, saved on the server" width="720"><br>
+  <sub>Hall of Fame: the best players, shared by everyone, saved on the server</sub>
+</p>
+
 ## Running the game
 
 ```powershell

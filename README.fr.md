@@ -30,6 +30,11 @@ Toute la logique du jeu est écrite en C#. Elle tourne dans le navigateur via We
   </tr>
 </table>
 
+<p align="center">
+  <img src="docs/screenshots/hall-of-fame-fr.png" alt="Hall of Fame : les meilleurs joueurs, visibles par tous, enregistrés sur le serveur" width="720"><br>
+  <sub>Hall of Fame : les meilleurs joueurs, visibles par tous, enregistrés sur le serveur</sub>
+</p>
+
 ## Lancer le jeu
 
 ```powershell
