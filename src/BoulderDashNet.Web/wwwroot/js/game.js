@@ -44,7 +44,7 @@ export function isMusicOn() { return music.enabled; }
 export function toggleMusic() {
     sound.unlock();
     music.enabled = !music.enabled;
-    try { localStorage.setItem('bdnet.music', music.enabled ? '1' : '0'); } catch { /* stockage indisponible */ }
+    setCookie('bdnet_music', music.enabled ? '1' : '0');
     return music.enabled;
 }
 
@@ -78,16 +78,20 @@ export function setLanguage(code) {
     try { localStorage.setItem('bdnet.lang', lang); } catch { /* stockage indisponible */ }
 }
 
-// Pseudo du Hall of Fame, mémorisé dans un cookie (1 an).
-export function getPseudo() {
-    const m = document.cookie.match(/(?:^|;\s*)bdnet_pseudo=([^;]*)/);
-    try { return m ? decodeURIComponent(m[1]) : ''; } catch { return ''; }
+// Cookies d'une durée d'un an (pseudo du Hall of Fame, préférence musique).
+function getCookie(key) {
+    const m = document.cookie.match(new RegExp(`(?:^|;\\s*)${key}=([^;]*)`));
+    try { return m ? decodeURIComponent(m[1]) : null; } catch { return null; }
 }
 
-export function setPseudo(name) {
+function setCookie(key, value) {
     const secure = location.protocol === 'https:' ? '; Secure' : '';
-    document.cookie = `bdnet_pseudo=${encodeURIComponent(name)}; Max-Age=31536000; Path=/; SameSite=Lax${secure}`;
+    document.cookie = `${key}=${encodeURIComponent(value)}; Max-Age=31536000; Path=/; SameSite=Lax${secure}`;
 }
+
+export function getPseudo() { return getCookie('bdnet_pseudo') ?? ''; }
+
+export function setPseudo(name) { setCookie('bdnet_pseudo', name); }
 
 export function saveProgress(level, hiscore) {
     try {
@@ -616,6 +620,7 @@ function onPointerUp(e) {
 function onCanvasClick() { sound.unlock(); }
 
 function onAnyClick(e) {
+    sound.unlock();                       // le navigateur n'autorise l'audio qu'après un geste du joueur
     const b = e.target.closest?.('button');
     if (b && !b.closest('.touchpad')) b.blur();
 }
@@ -720,7 +725,8 @@ function playEvents(e) {
 // basse triangle, arpège carré, mélodie carrée, batterie au bruit blanc.
 
 const music = {
-    enabled: (() => { try { return localStorage.getItem('bdnet.music') === '1'; } catch { return false; } })(),
+    // Musique active par défaut ; le choix du joueur est mémorisé dans le cookie bdnet_music.
+    enabled: getCookie('bdnet_music') !== '0',
     playing: false, timer: 0, nextTime: 0, step: 0, bus: null,
 };
 

@@ -58,8 +58,8 @@ public static partial class HighScoreRules
 }
 
 /// <summary>
-/// Tableau des meilleurs scores : un seul score (le meilleur) par pseudo, trié par score décroissant,
-/// puis niveau atteint, puis ancienneté.
+/// Tableau des meilleurs scores, trié par score décroissant, puis niveau atteint, puis ancienneté.
+/// Un même pseudo peut y figurer plusieurs fois (une ligne par partie enregistrée).
 /// </summary>
 public sealed class HighScoreBoard
 {
@@ -80,25 +80,18 @@ public sealed class HighScoreBoard
 
     public IReadOnlyList<HighScoreEntry> Top(int count) => _entries.Take(Math.Clamp(count, 0, Capacity)).ToList();
 
-    /// <summary>Ajoute un score ; renvoie le rang (1 = premier) du joueur, ou 0 s'il n'entre pas au classement.</summary>
-    public int Submit(HighScoreEntry entry)
-    {
-        Insert(entry);
-        var index = _entries.FindIndex(e => SameName(e.Name, entry.Name));
-        return index + 1;
-    }
+    /// <summary>Ajoute un score ; renvoie son rang (1 = premier), ou 0 s'il n'entre pas au classement.</summary>
+    public int Submit(HighScoreEntry entry) => Insert(entry) + 1;
 
-    private void Insert(HighScoreEntry entry)
+    /// <summary>Insère le score à sa place ; renvoie son index, ou -1 s'il dépasse la capacité.</summary>
+    private int Insert(HighScoreEntry entry)
     {
-        var existing = _entries.FindIndex(e => SameName(e.Name, entry.Name));
-        if (existing >= 0)
-        {
-            if (Compare(entry, _entries[existing]) >= 0) return; // l'ancien score reste meilleur
-            _entries.RemoveAt(existing);
-        }
         var pos = _entries.FindIndex(e => Compare(entry, e) < 0);
-        _entries.Insert(pos < 0 ? _entries.Count : pos, entry);
+        if (pos < 0) pos = _entries.Count;
+        if (pos >= Capacity) return -1;
+        _entries.Insert(pos, entry);
         if (_entries.Count > Capacity) _entries.RemoveRange(Capacity, _entries.Count - Capacity);
+        return pos;
     }
 
     /// <summary>Négatif si <paramref name="a"/> doit être classé avant <paramref name="b"/>.</summary>
@@ -109,6 +102,4 @@ public sealed class HighScoreBoard
         c = b.Level.CompareTo(a.Level);
         return c != 0 ? c : a.Date.CompareTo(b.Date);
     }
-
-    private static bool SameName(string a, string b) => string.Equals(a, b, StringComparison.OrdinalIgnoreCase);
 }

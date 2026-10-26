@@ -20,24 +20,30 @@
         {
             case GameState.Title:
                 <div class="overlay title">
-                    <h1 class="logo"><span>BOULDER</span><span>DASH</span><small>.NET</small></h1>
-                    <p class="tagline">@L("tagline")</p>
-                    <button class="btn primary" @onclick="() => Play(0)">▶ @L("play") <kbd>@L("key.enter")</kbd></button>
-                    <div class="levels">
-                        <span class="label">@L("levels")</span>
-                        @for (var i = 0; i < _game.LevelList.Count; i++)
+                    <div class="title-main">
+                        <h1 class="logo"><span>BOULDER</span><span>DASH</span><small>.NET</small></h1>
+                        <p class="tagline">@L("tagline")</p>
+                        <button class="btn primary" @onclick="() => Play(0)">▶ @L("play") <kbd>@L("key.enter")</kbd></button>
+                        <div class="levels">
+                            <span class="label">@L("levels")</span>
+                            @for (var i = 0; i < _game.LevelList.Count; i++)
+                            {
+                                var index = i;
+                                var locked = index > _unlockedLevel;
+                                <button class="lvl" disabled="@locked" title="@Texts.LevelName(_lang, _game.LevelList[index])"
+                                        @onclick="() => Play(index)">@(locked ? "🔒" : (index + 1).ToString())</button>
+                            }
+                        </div>
+                        <button class="btn hof-btn" @onclick="OpenHallOfFame">🏆 @L("hof.title")</button>
+                        @if (_highScore > 0)
                         {
-                            var index = i;
-                            var locked = index > _unlockedLevel;
-                            <button class="lvl" disabled="@locked" title="@Texts.LevelName(_lang, _game.LevelList[index])"
-                                    @onclick="() => Play(index)">@(locked ? "🔒" : (index + 1).ToString())</button>
+                            <p class="hiscore">@L("highscore")@L("colon") @_highScore.ToString("000000")</p>
                         }
                     </div>
-                    <button class="btn hof-btn" @onclick="OpenHallOfFame">🏆 @L("hof.title")</button>
-                    @if (_highScore > 0)
-                    {
-                        <p class="hiscore">@L("highscore")@L("colon") @_highScore.ToString("000000")</p>
-                    }
+                    <aside class="title-hof" aria-label="@L("hof.title")">
+                        <h2>🏆 @L("hof.title")</h2>
+                        @ScoresTable(true)
+                    </aside>
                 </div>
                 break;
 
@@ -103,39 +109,7 @@
             <div class="overlay hof">
                 <div class="card">
                     <h2>🏆 @L("hof.title")</h2>
-                    @if (_hofLoading)
-                    {
-                        <p>@L("hof.loading")</p>
-                    }
-                    else if (_hofError)
-                    {
-                        <p class="danger">@L("hof.unavailable")</p>
-                    }
-                    else if (_scores.Count == 0)
-                    {
-                        <p>@L("hof.empty")</p>
-                    }
-                    else
-                    {
-                        <table class="scores">
-                            <thead>
-                                <tr><th>#</th><th>@L("hof.player")</th><th>@L("hof.level")</th><th>@L("score")</th></tr>
-                            </thead>
-                            <tbody>
-                                @for (var i = 0; i < _scores.Count; i++)
-                                {
-                                    var e = _scores[i];
-                                    var me = string.Equals(e.Name, _pseudo, StringComparison.OrdinalIgnoreCase);
-                                    <tr class="@(me ? "me" : "")">
-                                        <td class="rank">@(i switch { 0 => "🥇", 1 => "🥈", 2 => "🥉", _ => (i + 1).ToString() })</td>
-                                        <td class="name">@e.Name</td>
-                                        <td>@e.Level</td>
-                                        <td class="pts">@e.Score.ToString("000000")</td>
-                                    </tr>
-                                }
-                            </tbody>
-                        </table>
-                    }
+                    @ScoresTable(false)
                     <button class="btn" @onclick="CloseHallOfFame">@L("hof.close")</button>
                 </div>
             </div>
@@ -161,6 +135,55 @@
 </div>
 
 @code {
+    /// <summary>Tableau du Hall of Fame ; <paramref name="compact"/> = version réduite de l'écran d'accueil.</summary>
+    private RenderFragment ScoresTable(bool compact) => __builder =>
+    {
+        if (_hofLoading && _scores.Count == 0)
+        {
+            <p>@L("hof.loading")</p>
+        }
+        else if (_hofError && _scores.Count == 0)
+        {
+            <p class="danger">@L("hof.unavailable")</p>
+        }
+        else if (_scores.Count == 0)
+        {
+            <p>@L("hof.empty")</p>
+        }
+        else
+        {
+            <table class="scores @(compact ? "compact" : "")">
+                <thead>
+                    <tr>
+                        <th>#</th><th>@L("hof.player")</th>
+                        @if (!compact)
+                        {
+                            <th>@L("hof.level")</th>
+                        }
+                        <th>@L("score")</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (var i = 0; i < _scores.Count; i++)
+                    {
+                        var e = _scores[i];
+                        var me = _pseudo.Length > 0 && string.Equals(e.Name, _pseudo, StringComparison.OrdinalIgnoreCase);
+                        var last = _lastSubmitted is not null && e == _lastSubmitted;
+                        <tr class="@(me ? "me" : "") @(last ? "last" : "")">
+                            <td class="rank">@(i switch { 0 => "🥇", 1 => "🥈", 2 => "🥉", _ => (i + 1).ToString() })</td>
+                            <td class="name">@e.Name</td>
+                            @if (!compact)
+                            {
+                                <td>@e.Level</td>
+                            }
+                            <td class="pts">@e.Score.ToString("000000")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+    };
+
     private RenderFragment SubmitScoreForm => __builder =>
     {
         if (_game.Score <= 0) return;

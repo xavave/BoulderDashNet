@@ -73,7 +73,7 @@ Chaque chargement de page ajoute une ligne à `logs/access-AAAA-MM-JJ.log` : dat
 
 ### Hall of Fame
 
-En fin de partie (game over ou victoire), le joueur peut inscrire son pseudo au Hall of Fame. Le pseudo est mémorisé dans un cookie (`bdnet_pseudo`, 1 an). Les scores sont enregistrés sur le serveur dans `data/highscores.json` (meilleur score par joueur, 100 premiers) et tout le monde voit le classement depuis l'écran d'accueil.
+En fin de partie (game over ou victoire), le joueur peut inscrire son pseudo au Hall of Fame. Le pseudo est mémorisé dans un cookie (`bdnet_pseudo`, 1 an). Les scores sont enregistrés sur le serveur dans `data/highscores.json` (100 meilleurs scores ; un même pseudo peut y figurer plusieurs fois) et le top 10 est affiché directement sur l'écran d'accueil.
 
 - API : `GET /api/scores?top=10`, `POST /api/scores` `{ "name", "score", "level" }`
 - Pseudo : 1 à 16 lettres, chiffres, espaces ou `- _ . ' !`
@@ -92,7 +92,7 @@ L'endpoint `/health` répond `{"status":"ok"}` (supervision).
 | R (en pause) | Abandonner le niveau (perd une vie) |
 | Entrée | Commencer / passer l'intro |
 | M | Couper / remettre les bruitages |
-| N | Musique 8 bits de l'écran d'accueil (désactivée par défaut, aussi via le bouton 🎵) |
+| N | Musique 8 bits de l'écran d'accueil (activée par défaut, aussi via le bouton 🎵 ; choix mémorisé dans le cookie `bdnet_music`) |
 
 Sur un écran tactile, une croix directionnelle s'affiche automatiquement.
 

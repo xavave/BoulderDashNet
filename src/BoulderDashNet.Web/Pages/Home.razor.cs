@@ -36,6 +36,8 @@ public partial class Home : IAsyncDisposable
     private int _myRank;
     private bool _hofOpen, _hofLoading, _hofError;
     private List<HighScoreEntry> _scores = [];
+    private HighScoreEntry? _lastSubmitted;   // dernier score envoyé depuis ce navigateur (mis en évidence)
+    private const int HofSize = 10;
     private bool _musicOn;
 
     private GameState State => _game.State;
@@ -55,6 +57,7 @@ public partial class Home : IAsyncDisposable
         await _module.InvokeVoidAsync("start", _selfRef, _canvas, _game.ViewWidth, _game.ViewHeight);
         await _module.InvokeVoidAsync("setLanguage", Texts.Code(_lang));
         StateHasChanged();
+        await RefreshScoresAsync();
     }
 
     /// <summary>Appelée par la boucle requestAnimationFrame à chaque image.</summary>
@@ -89,6 +92,7 @@ public partial class Home : IAsyncDisposable
             _submit = SubmitState.Idle;
             _submitError = null;
         }
+        if (State == GameState.Title) _ = RefreshScoresAsync();
         var save = false;
         if (State == GameState.LevelIntro && _game.LevelIndex > _unlockedLevel)
         {
@@ -157,18 +161,26 @@ public partial class Home : IAsyncDisposable
     private async Task OpenHallOfFame()
     {
         _hofOpen = true;
-        _hofLoading = _scores.Count == 0;
-        _hofError = false;
         StateHasChanged();
+        await RefreshScoresAsync();
+    }
+
+    /// <summary>Recharge le Hall of Fame depuis le serveur (écran d'accueil et fenêtre dédiée).</summary>
+    private async Task RefreshScoresAsync()
+    {
+        if (_hofLoading) return;
+        _hofLoading = true;
+        _hofError = false;
         try
         {
-            _scores = await Http.GetFromJsonAsync<List<HighScoreEntry>>("api/scores?top=10") ?? [];
+            _scores = await Http.GetFromJsonAsync<List<HighScoreEntry>>($"api/scores?top={HofSize}") ?? [];
         }
         catch
         {
             _hofError = true;
         }
         _hofLoading = false;
+        StateHasChanged();
     }
 
     private void CloseHallOfFame() => _hofOpen = false;
@@ -195,6 +207,7 @@ public partial class Home : IAsyncDisposable
                 var result = await response.Content.ReadFromJsonAsync<HighScoreResult>();
                 _myRank = result?.Rank ?? 0;
                 _scores = result?.Top.ToList() ?? _scores;
+                _lastSubmitted = _myRank > 0 && _myRank <= _scores.Count ? _scores[_myRank - 1] : null;
                 _submit = SubmitState.Done;
                 return;
             }

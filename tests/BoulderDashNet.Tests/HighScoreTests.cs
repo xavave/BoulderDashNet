@@ -39,16 +39,24 @@ public class HighScoreTests
     }
 
     [Fact]
-    public void Only_the_best_score_per_player_is_kept()
+    public void A_player_can_appear_several_times()
     {
         var board = new HighScoreBoard();
-        Assert.Equal(1, board.Submit(E("Xavier", 200)));
-        Assert.Equal(1, board.Submit(E("xavier", 150)));   // moins bon : ignoré
-        Assert.Single(board.Entries);
-        Assert.Equal(200, board.Entries[0].Score);
-        Assert.Equal(1, board.Submit(E("XAVIER", 500)));   // meilleur : remplace
-        Assert.Single(board.Entries);
-        Assert.Equal(500, board.Entries[0].Score);
+        Assert.Equal(1, board.Submit(E("xav", 200, 1, 0)));
+        Assert.Equal(2, board.Submit(E("Xav", 150, 1, 1)));
+        Assert.Equal(1, board.Submit(E("XAV", 500, 2, 2)));
+        Assert.Equal(2, board.Submit(E("Bob", 300, 1, 3)));
+        Assert.Equal([500, 300, 200, 150], board.Entries.Select(e => e.Score));
+        Assert.Equal(3, board.Entries.Count(e => e.Name.Equals("xav", StringComparison.OrdinalIgnoreCase)));
+    }
+
+    [Fact]
+    public void Same_score_twice_ranks_the_newest_after_the_oldest()
+    {
+        var board = new HighScoreBoard();
+        Assert.Equal(1, board.Submit(E("xav", 200, 1, 0)));
+        Assert.Equal(2, board.Submit(E("xav", 200, 1, 1)));
+        Assert.Equal(2, board.Entries.Count);
     }
 
     [Fact]

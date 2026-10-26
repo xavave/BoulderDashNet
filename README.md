@@ -73,7 +73,7 @@ Each page load appends a line to `logs/access-YYYY-MM-DD.log`: date, client IP, 
 
 ### Hall of Fame
 
-At the end of a game (game over or victory), players can enter their name in the Hall of Fame. The name is remembered in a cookie (`bdnet_pseudo`, 1 year). Scores are stored on the server in `data/highscores.json` (best score per player, top 100) and everyone can see the leaderboard from the title screen.
+At the end of a game (game over or victory), players can enter their name in the Hall of Fame. The name is remembered in a cookie (`bdnet_pseudo`, 1 year). Scores are stored on the server in `data/highscores.json` (top 100 scores; the same name can appear several times) and the top 10 is shown right on the title screen.
 
 - API: `GET /api/scores?top=10`, `POST /api/scores` `{ "name", "score", "level" }`
 - Names: 1 to 16 letters, digits, spaces or `- _ . ' !`
@@ -92,7 +92,7 @@ The `/health` endpoint returns `{"status":"ok"}` for monitoring.
 | R (while paused) | Give up the level (costs a life) |
 | Enter | Start / skip the intro |
 | M | Mute / unmute sound effects |
-| N | Title screen 8-bit music on / off (off by default, also a 🎵 button) |
+| N | Title screen 8-bit music on / off (on by default, also a 🎵 button; choice remembered in the `bdnet_music` cookie) |
 
 On touch screens, an on-screen D-pad appears automatically.
 

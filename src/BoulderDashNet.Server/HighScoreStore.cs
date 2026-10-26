@@ -10,7 +10,7 @@ public sealed class HighScoreOptions
     /// <summary>Fichier JSON des scores (relatif au dossier de l'application : /app/data dans le conteneur).</summary>
     public string File { get; set; } = "data/highscores.json";
 
-    /// <summary>Nombre de joueurs conservés au classement.</summary>
+    /// <summary>Nombre de scores conservés au classement.</summary>
     public int MaxEntries { get; set; } = 100;
 }
 

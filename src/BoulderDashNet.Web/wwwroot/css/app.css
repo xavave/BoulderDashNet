@@ -316,3 +316,38 @@ table.scores tbody tr.me:nth-child(even) td { background: rgba(255, 210, 63, .14
 .btn.small { min-width: 0; padding: 6px 14px; }
 .small { font-size: 13px; }
 .rank-msg { color: var(--diamond) !important; font-weight: 700; }
+table.scores tr.last td { background: rgba(127, 231, 255, .18) !important; }
+table.scores tr.last td.name { color: var(--diamond); }
+
+/* Hall of Fame affiché directement sur l'écran d'accueil */
+.screen { container-type: inline-size; }
+.overlay.title { flex-direction: row; justify-content: space-evenly; gap: 3cqw; padding: 3cqw; }
+.title-main { display: flex; flex-direction: column; align-items: center; gap: 1.8cqw; min-width: 0; }
+.overlay.title .logo { font-size: clamp(26px, 8.5cqw, 72px); }
+.overlay.title .btn { min-width: 0; }
+.overlay.title .hof-btn { display: none; }
+.title-hof {
+    flex: 0 0 38%;
+    max-height: 100%;
+    overflow-y: auto;
+    background: rgba(18, 18, 30, .88);
+    border: 2px solid #34344f;
+    border-radius: 10px;
+    padding: 1.6cqw 1.8cqw;
+    display: flex;
+    flex-direction: column;
+    gap: 1cqw;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, .6);
+}
+.title-hof h2 { margin: 0; font-size: clamp(14px, 2.6cqw, 22px); letter-spacing: .06em; color: var(--accent); }
+.title-hof p { margin: 0; color: var(--muted); font-size: clamp(11px, 1.8cqw, 14px); }
+table.scores.compact { font-size: clamp(10px, 1.9cqw, 15px); }
+table.scores.compact th, table.scores.compact td { padding: .25cqw .8cqw; }
+table.scores.compact td.name { max-width: 9em; }
+
+/* Écran étroit : le classement repasse dans sa fenêtre, ouverte par le bouton */
+@container (max-width: 560px) {
+    .overlay.title { flex-direction: column; }
+    .title-hof { display: none; }
+    .overlay.title .hof-btn { display: inline-flex; }
+}
