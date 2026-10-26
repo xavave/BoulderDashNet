@@ -490,3 +490,4 @@ Dockerfile
 .dockerignore
 docker-compose.yml
 DOCKER.md
+boulderdashnet-docker.zip
