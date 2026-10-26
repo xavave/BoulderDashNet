@@ -1,105 +1,109 @@
 # BoulderDashNet
 
-Hommage en **.NET 10 / Blazor WebAssembly** aux classiques Amiga **Boulder Dash** et **Emerald Mine**.
-Toute la logique du jeu est écrite en C#. Elle tourne dans le navigateur via WebAssembly, et le rendu se fait sur un `<canvas>` en pixel art généré par le code (aucun asset externe).
+🇬🇧 **English** · 🇫🇷 [Français](README.fr.md)
 
-## Lancer le jeu
+A **.NET 10 / Blazor WebAssembly** tribute to the Amiga classics **Boulder Dash** and **Emerald Mine**.
+All the game logic is written in C#. It runs in the browser through WebAssembly, and everything is drawn on a `<canvas>` with pixel art generated in code (no external assets).
+
+> The in-game interface is in French.
+
+## Running the game
 
 ```powershell
 dotnet run --project src/BoulderDashNet.Server
 ```
 
-Ouvrez ensuite <http://localhost:5046>. L'hôte ASP.NET Core sert le jeu et tient un journal des connexions (dossier `logs/`, un fichier par jour).
+Then open <http://localhost:5046>. The ASP.NET Core host serves the game and keeps an access log (`logs/` folder, one file per day).
 
-Pour lancer seulement le client WebAssembly, sans l'hôte : `dotnet run --project src/BoulderDashNet.Web` (<http://localhost:5018>).
+To run only the WebAssembly client, without the host: `dotnet run --project src/BoulderDashNet.Web` (<http://localhost:5018>).
 
-Lancer les tests :
+Run the tests:
 
 ```powershell
 dotnet test
 ```
 
-Publier :
+Publish:
 
 ```powershell
-# Hôte ASP.NET Core + jeu (journal des connexions inclus)
+# ASP.NET Core host + game (access log included)
 dotnet publish src/BoulderDashNet.Server -c Release -o publish
 
-# ou site 100 % statique, pour n'importe quel serveur web (IIS, nginx, Web Station…)
-dotnet publish src/BoulderDashNet.Web -c Release -o publish-static   # le site est dans publish-static/wwwroot
+# or a fully static site, for any web server (IIS, nginx, Web Station…)
+dotnet publish src/BoulderDashNet.Web -c Release -o publish-static   # the site is in publish-static/wwwroot
 ```
 
-### Journal des connexions
+### Access log
 
-Chaque chargement de page ajoute une ligne à `logs/access-AAAA-MM-JJ.log` : date, IP du client, chemin, code HTTP, référent et navigateur. Derrière un reverse proxy, l'IP réelle est lue dans `X-Forwarded-For`. Réglages dans `appsettings.json`, section `AccessLog`, ou par variables d'environnement :
+Each page load appends a line to `logs/access-YYYY-MM-DD.log`: date, client IP, path, HTTP status, referrer and user agent. Behind a reverse proxy, the real IP is read from `X-Forwarded-For`. Settings live in the `AccessLog` section of `appsettings.json`, or can be set with environment variables:
 
-| Variable | Défaut | Rôle |
+| Variable | Default | Purpose |
 |---|---|---|
-| `AccessLog__Enabled` | `true` | Active le journal |
-| `AccessLog__Directory` | `logs` | Dossier des fichiers |
-| `AccessLog__RetentionDays` | `90` | Jours de conservation (`0` = illimité) |
+| `AccessLog__Enabled` | `true` | Turns the log on or off |
+| `AccessLog__Directory` | `logs` | Folder for the log files |
+| `AccessLog__RetentionDays` | `90` | Days to keep log files (`0` = keep forever) |
 
-L'endpoint `/health` répond `{"status":"ok"}` (supervision).
+The `/health` endpoint returns `{"status":"ok"}` for monitoring.
 
-## Commandes
+## Controls
 
-| Touche | Action |
+| Key | Action |
 |---|---|
-| Flèches / ZQSD (WASD) | Déplacer le mineur |
-| Espace (ou Ctrl) + direction | Creuser / ramasser **sans bouger** |
-| Échap / P | Pause |
-| R (en pause) | Abandonner le niveau (perd une vie) |
-| Entrée | Commencer / passer l'intro |
-| M | Couper / remettre le son |
+| Arrow keys / WASD (ZQSD on AZERTY) | Move the miner |
+| Space (or Ctrl) + direction | Dig / collect **without moving** |
+| Esc / P | Pause |
+| R (while paused) | Give up the level (costs a life) |
+| Enter | Start / skip the intro |
+| M | Mute / unmute |
 
-Sur un écran tactile, une croix directionnelle s'affiche automatiquement.
+On touch screens, an on-screen D-pad appears automatically.
 
-## Règles
+## Rules
 
-- Ramassez le nombre de diamants demandé : la sortie s'ouvre (l'écran clignote). Rejoignez-la avant la fin du chrono.
-- Un rocher ou un diamant **qui tombe** est mortel. Ceux qui reposent ne le sont pas, mais ils roulent sur les rochers, les diamants et les murs de briques.
-- Vous pouvez pousser horizontalement un rocher si la case derrière lui est vide.
-- **Luciole** (carré orange) : elle longe les parois par la gauche et explose à votre contact. Écrasez-la sous un rocher.
-- **Papillon** (ailes violettes) : il longe les parois par la droite. Écrasé, il se transforme en 9 diamants.
-- **Amibe** (verte) : elle grandit. Enfermée, elle se change en diamants ; trop grosse, elle se pétrifie en rochers. Elle fait exploser les ennemis qu'elle touche.
-- **Mur magique** : activé par un objet qui tombe dessus, il transforme pendant un temps limité les rochers en diamants (et inversement).
-- Le temps restant en fin de niveau s'ajoute au score. Vous gagnez une vie tous les 500 points.
+- Collect the required number of diamonds: the exit opens (the screen flashes). Reach it before time runs out.
+- A **falling** boulder or diamond is deadly. Resting ones are not, but they roll off boulders, diamonds and brick walls.
+- You can push a boulder sideways if the cell behind it is empty.
+- **Firefly** (orange square): follows walls on its left and explodes when it touches you. Crush it with a boulder.
+- **Butterfly** (purple wings): follows walls on its right. When crushed, it turns into 9 diamonds.
+- **Amoeba** (green): keeps growing. When enclosed, it turns into diamonds; when it gets too big, it turns into boulders. It makes any enemy it touches explode.
+- **Magic wall**: triggered when an object falls on it. For a limited time it turns boulders into diamonds (and the other way round).
+- Time left at the end of a level is added to your score. You earn an extra life every 500 points.
 
-Le niveau atteint et le meilleur score sont mémorisés dans le navigateur (localStorage).
+The highest level reached and the best score are saved in the browser (localStorage).
 
-## Structure
+## Project structure
 
 ```
 BoulderDashNet.sln
 src/
-  BoulderDashNet.Core/     moteur du jeu (C# pur, sans dépendance)
-    Tiles.cs               types de cases, directions, événements, codes de rendu
-    Cave.cs                physique et règles (balayage de la grille à chaque tick)
-    GameSession.cs         partie : niveaux, vies, score, chrono, caméra
-    CaveDefinition.cs      définition d'une caverne + CaveBuilder (carte ASCII ou procédurale)
-    Levels.cs              les 7 cavernes
-  BoulderDashNet.Server/   hôte ASP.NET Core : sert le jeu, journal des connexions, /health
-  BoulderDashNet.Web/      application Blazor WebAssembly
-    Pages/Home.razor(.cs)  menus et écrans (HTML) + pont avec le moteur
-    wwwroot/js/game.js     rendu canvas, sprites, clavier/tactile, sons WebAudio
+  BoulderDashNet.Core/     game engine (pure C#, no dependencies)
+    Tiles.cs               cell types, directions, events, render codes
+    Cave.cs                physics and rules (grid scan on every tick)
+    GameSession.cs         game session: levels, lives, score, timer, camera
+    CaveDefinition.cs      cave definition + CaveBuilder (ASCII map or procedural)
+    Levels.cs              the 7 caves
+  BoulderDashNet.Server/   ASP.NET Core host: serves the game, access log, /health
+  BoulderDashNet.Web/      Blazor WebAssembly app
+    Pages/Home.razor(.cs)  menus and screens (HTML) + bridge to the engine
+    wwwroot/js/game.js     canvas rendering, sprites, keyboard/touch input, WebAudio sounds
     wwwroot/css/app.css
 tests/
-  BoulderDashNet.Tests/    tests xUnit du moteur et des niveaux
+  BoulderDashNet.Tests/    xUnit tests for the engine and levels
 ```
 
-### Boucle de jeu
+### Game loop
 
-`game.js` appelle `Home.Frame(dt, direction, ...)` à chaque `requestAnimationFrame`. Le moteur C# avance de 0, 1 ou plusieurs ticks (environ 7,7 par seconde, réglable par niveau via `TickSeconds`). Il renvoie ensuite un `byte[]` composé d'un en-tête (état, caméra, HUD, événements sonores) et d'un code de sprite par case. Le JavaScript ne fait que dessiner.
+`game.js` calls `Home.Frame(dt, direction, ...)` on every `requestAnimationFrame`. The C# engine advances by 0, 1 or more ticks (about 7.7 per second, adjustable per level with `TickSeconds`). It then returns a `byte[]` made of a header (state, camera, HUD, sound events) followed by one sprite code per cell. The JavaScript side only draws.
 
-### Ajouter un niveau
+### Adding a level
 
-Dans `Levels.cs`, ajoutez une `CaveDefinition` :
+In `Levels.cs`, add a `CaveDefinition`:
 
-- soit avec une carte ASCII (`Map`). Légende : `W` acier, `w` briques, `.` terre, espace vide, `r` rocher, `d` diamant, `P` joueur, `X` sortie, `q` luciole, `B` papillon, `a` amibe, `m` mur magique ;
-- soit avec une construction procédurale (`Build`) façon Boulder Dash : `RandomFill`, `Line`, `Box`, `FillRect`, `Set`…
+- either with an ASCII map (`Map`). Legend: `W` steel, `w` brick, `.` dirt, space = empty, `r` boulder, `d` diamond, `P` player, `X` exit, `q` firefly, `B` butterfly, `a` amoeba, `m` magic wall;
+- or with a Boulder Dash–style procedural build (`Build`): `RandomFill`, `Line`, `Box`, `FillRect`, `Set`…
 
-Le test `Every_level_is_well_formed` vérifie que chaque niveau a un joueur, une sortie et assez de diamants.
+The `Every_level_is_well_formed` test checks that every level has a player, an exit and enough diamonds.
 
-## Crédits
+## Credits
 
-Projet de fan. Les niveaux, les sprites et les sons sont des créations originales inspirées de Boulder Dash (First Star Software, 1984) et d'Emerald Mine (Kingsoft, 1987). Ce projet n'est affilié à aucun de ces éditeurs.
+Fan project. The levels, sprites and sounds are original creations inspired by Boulder Dash (First Star Software, 1984) and Emerald Mine (Kingsoft, 1987). This project is not affiliated with either publisher.
