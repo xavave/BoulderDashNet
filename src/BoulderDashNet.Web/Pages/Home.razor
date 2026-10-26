@@ -6,6 +6,10 @@
 
 <div class="stage">
     <div class="topbar">
+        <button type="button" class="music-btn @(_musicOn ? "on" : "")" @onclick="ToggleMusic"
+                title="@L("music.title") (N)" aria-pressed="@(_musicOn ? "true" : "false")">
+            @(_musicOn ? "🎵" : "🔇") <span>@L(_musicOn ? "music.on" : "music.off")</span>
+        </button>
         <LanguageSwitch Current="_lang" Changed="SetLanguage" />
     </div>
 
@@ -29,6 +33,7 @@
                                     @onclick="() => Play(index)">@(locked ? "🔒" : (index + 1).ToString())</button>
                         }
                     </div>
+                    <button class="btn hof-btn" @onclick="OpenHallOfFame">🏆 @L("hof.title")</button>
                     @if (_highScore > 0)
                     {
                         <p class="hiscore">@L("highscore")@L("colon") @_highScore.ToString("000000")</p>
@@ -73,6 +78,7 @@
                     <div class="card">
                         <h2 class="danger">@L("gameOver")</h2>
                         <p class="goal">@L("score")@L("colon") @_game.Score.ToString("000000")</p>
+                        @SubmitScoreForm
                         <button class="btn primary" @onclick="() => Play(_game.LevelIndex)">@L("retry")</button>
                         <button class="btn" @onclick="Menu">@L("menu")</button>
                     </div>
@@ -85,10 +91,54 @@
                         <h2>🏆 @L("victory")</h2>
                         <p>@L("victoryText")</p>
                         <p class="goal">@L("finalScore")@L("colon") @_game.Score.ToString("000000")</p>
+                        @SubmitScoreForm
                         <button class="btn primary" @onclick="Menu">@L("menu")</button>
                     </div>
                 </div>
                 break;
+        }
+
+        @if (_hofOpen)
+        {
+            <div class="overlay hof">
+                <div class="card">
+                    <h2>🏆 @L("hof.title")</h2>
+                    @if (_hofLoading)
+                    {
+                        <p>@L("hof.loading")</p>
+                    }
+                    else if (_hofError)
+                    {
+                        <p class="danger">@L("hof.unavailable")</p>
+                    }
+                    else if (_scores.Count == 0)
+                    {
+                        <p>@L("hof.empty")</p>
+                    }
+                    else
+                    {
+                        <table class="scores">
+                            <thead>
+                                <tr><th>#</th><th>@L("hof.player")</th><th>@L("hof.level")</th><th>@L("score")</th></tr>
+                            </thead>
+                            <tbody>
+                                @for (var i = 0; i < _scores.Count; i++)
+                                {
+                                    var e = _scores[i];
+                                    var me = string.Equals(e.Name, _pseudo, StringComparison.OrdinalIgnoreCase);
+                                    <tr class="@(me ? "me" : "")">
+                                        <td class="rank">@(i switch { 0 => "🥇", 1 => "🥈", 2 => "🥉", _ => (i + 1).ToString() })</td>
+                                        <td class="name">@e.Name</td>
+                                        <td>@e.Level</td>
+                                        <td class="pts">@e.Score.ToString("000000")</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    }
+                    <button class="btn" @onclick="CloseHallOfFame">@L("hof.close")</button>
+                </div>
+            </div>
         }
     </div>
 
@@ -97,6 +147,7 @@
         <span><kbd>@L("key.space")</kbd> @L("help.snap")</span>
         <span><kbd>@L("key.esc")</kbd> @L("help.pause")</span>
         <span><kbd>M</kbd> @L("help.sound")</span>
+        <span><kbd>N</kbd> @L("help.music")</span>
     </div>
 
     <div class="touchpad" aria-hidden="true">
@@ -108,3 +159,31 @@
         <button data-key="pause" class="pause">❚❚</button>
     </div>
 </div>
+
+@code {
+    private RenderFragment SubmitScoreForm => __builder =>
+    {
+        if (_game.Score <= 0) return;
+        switch (_submit)
+        {
+            case SubmitState.Done:
+                <p class="rank-msg">@(_myRank > 0 ? string.Format(L("hof.ranked"), _myRank) : L("hof.notRanked"))</p>
+                <button class="btn" @onclick="OpenHallOfFame">🏆 @L("hof.title")</button>
+                break;
+            default:
+                <form class="submit-score" @onsubmit="SubmitScore" @onsubmit:preventDefault>
+                    <label for="pseudo">@L("hof.pseudo")</label>
+                    <div class="row">
+                        <input id="pseudo" @bind="_pseudo" @bind:event="oninput" maxlength="@HighScoreRules.NameMaxLength"
+                               placeholder="@L("hof.placeholder")" autocomplete="nickname" spellcheck="false" />
+                        <button type="submit" class="btn primary small" disabled="@(_submit == SubmitState.Sending)">@L("hof.save")</button>
+                    </div>
+                    @if (_submitError is not null)
+                    {
+                        <p class="danger small">@_submitError</p>
+                    }
+                </form>
+                break;
+        }
+    };
+}

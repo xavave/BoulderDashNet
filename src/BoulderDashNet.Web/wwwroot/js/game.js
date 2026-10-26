@@ -39,8 +39,18 @@ export function start(dotnetRef, canvasEl, vw, vh) {
     rafId = requestAnimationFrame(loop);
 }
 
+export function isMusicOn() { return music.enabled; }
+
+export function toggleMusic() {
+    sound.unlock();
+    music.enabled = !music.enabled;
+    try { localStorage.setItem('bdnet.music', music.enabled ? '1' : '0'); } catch { /* stockage indisponible */ }
+    return music.enabled;
+}
+
 export function stop() {
     cancelAnimationFrame(rafId);
+    stopMusic(true);
     detachInput();
     dotnet = null;
 }
@@ -66,6 +76,17 @@ export function setLanguage(code) {
     lang = code === 'en' ? 'en' : 'fr';
     document.documentElement.lang = lang;
     try { localStorage.setItem('bdnet.lang', lang); } catch { /* stockage indisponible */ }
+}
+
+// Pseudo du Hall of Fame, mémorisé dans un cookie (1 an).
+export function getPseudo() {
+    const m = document.cookie.match(/(?:^|;\s*)bdnet_pseudo=([^;]*)/);
+    try { return m ? decodeURIComponent(m[1]) : ''; } catch { return ''; }
+}
+
+export function setPseudo(name) {
+    const secure = location.protocol === 'https:' ? '; Secure' : '';
+    document.cookie = `bdnet_pseudo=${encodeURIComponent(name)}; Max-Age=31536000; Path=/; SameSite=Lax${secure}`;
 }
 
 export function saveProgress(level, hiscore) {
@@ -125,6 +146,7 @@ function render(buf) {
     if (st.events & EV.ExitOpened) flash = 1;
     if (st.state === STATE.Playing && st.time !== lastTimeLeft && st.time <= 10 && st.time > 0) sfx.tick();
     lastTimeLeft = st.time;
+    updateMusic(st.state === STATE.Title);
 
     ctx.fillStyle = '#000';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -534,8 +556,14 @@ function pressDir(d) {
 function releaseDir(d) { input.stack = input.stack.filter(x => x !== d); }
 function updateSnap() { input.snap = input.snapKeys.size > 0; }
 
+function isTyping(e) {
+    const t = e.target;
+    return t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable);
+}
+
 function onKeyDown(e) {
     sound.unlock();
+    if (isTyping(e)) return;
     if (GAME_KEYS.has(e.code) && !(e.code.startsWith('Key') && (e.ctrlKey || e.metaKey) && e.code !== 'KeyP'))
         e.preventDefault();
     if (e.ctrlKey && DIR_KEYS[e.code] && e.code.startsWith('Arrow')) input.snapKeys.add('Ctrl');
@@ -549,11 +577,13 @@ function onKeyDown(e) {
         case 'Escape': case 'KeyP': input.latched |= 4; break;
         case 'KeyR': input.latched |= 8; break;
         case 'KeyM': sound.enabled = !sound.enabled; break;
+        case 'KeyN': dotnet?.invokeMethodAsync('SetMusicState', toggleMusic()); break;
     }
     updateSnap();
 }
 
 function onKeyUp(e) {
+    if (isTyping(e)) return;
     const d = DIR_KEYS[e.code];
     if (d) releaseDir(d);
     if (e.code === 'Space') input.snapKeys.delete('Space');
@@ -683,4 +713,129 @@ function playEvents(e) {
     if (e & EV.Push) sfx.push();
     if (e & EV.Dig) sfx.dig();
     else if (e & EV.Step) sfx.step();
+}
+
+// ---------------------------------------------------------------- musique 8 bits (composition originale)
+// Boucle de 4 mesures (La m - Fa - Do - Sol), 140 BPM, en doubles croches :
+// basse triangle, arpège carré, mélodie carrée, batterie au bruit blanc.
+
+const music = {
+    enabled: (() => { try { return localStorage.getItem('bdnet.music') === '1'; } catch { return false; } })(),
+    playing: false, timer: 0, nextTime: 0, step: 0, bus: null,
+};
+
+const STEP = 60 / 140 / 4;               // durée d'une double croche
+const CHORDS = [                          // [basse, arpège]
+    [45, [57, 60, 64, 69]],               // La mineur
+    [41, [53, 57, 60, 65]],               // Fa majeur
+    [48, [60, 64, 67, 72]],               // Do majeur
+    [43, [55, 59, 62, 67]],               // Sol majeur
+];
+const LEAD = [                            // [pas, note MIDI, durée en pas]
+    [0, 76, 2], [2, 81, 2], [4, 84, 2], [6, 83, 1], [7, 81, 1], [9, 79, 2], [11, 76, 4],
+    [16, 77, 2], [18, 81, 2], [20, 84, 2], [22, 86, 2], [24, 84, 2], [26, 81, 2], [28, 77, 4],
+    [32, 79, 2], [34, 84, 2], [36, 88, 2], [38, 86, 1], [39, 84, 1], [41, 79, 2], [43, 76, 4],
+    [48, 74, 2], [50, 79, 2], [52, 83, 2], [54, 86, 2], [56, 83, 1], [57, 81, 1], [58, 79, 2], [60, 83, 4],
+];
+const LEAD_AT = new Map(LEAD.map(n => [n[0], n]));
+const midi = n => 440 * Math.pow(2, (n - 69) / 12);
+
+function updateMusic(onTitle) {
+    const want = music.enabled && onTitle && sound.ctx && sound.ctx.state === 'running';
+    if (want && !music.playing) startMusic();
+    else if (!want && music.playing) stopMusic();
+}
+
+function startMusic() {
+    const a = sound.ctx;
+    music.bus = a.createGain();
+    music.bus.gain.setValueAtTime(0.0001, a.currentTime);
+    music.bus.gain.exponentialRampToValueAtTime(0.5, a.currentTime + 0.4);
+    music.bus.connect(a.destination);
+    music.playing = true;
+    music.step = 0;
+    music.nextTime = a.currentTime + 0.05;
+    music.timer = setInterval(scheduleMusic, 25);
+    scheduleMusic();
+}
+
+function stopMusic(immediate = false) {
+    clearInterval(music.timer);
+    music.playing = false;
+    const bus = music.bus;
+    music.bus = null;
+    if (!bus || !sound.ctx) return;
+    const t = sound.ctx.currentTime;
+    bus.gain.cancelScheduledValues(t);
+    bus.gain.setValueAtTime(bus.gain.value, t);
+    bus.gain.exponentialRampToValueAtTime(0.0001, t + (immediate ? 0.02 : 0.3));
+    setTimeout(() => bus.disconnect(), 500);
+}
+
+function scheduleMusic() {
+    const a = sound.ctx;
+    if (!a || !music.bus) return;
+    while (music.nextTime < a.currentTime + 0.15) {
+        playStep(music.step, music.nextTime);
+        music.nextTime += STEP;
+        music.step = (music.step + 1) % 64;
+    }
+}
+
+function voice(type, freq, t, dur, vol) {
+    const a = sound.ctx;
+    const o = a.createOscillator(), g = a.createGain();
+    o.type = type;
+    o.frequency.setValueAtTime(freq, t);
+    g.gain.setValueAtTime(vol, t);
+    g.gain.setValueAtTime(vol, t + dur * 0.7);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    o.connect(g).connect(music.bus);
+    o.start(t);
+    o.stop(t + dur + 0.02);
+}
+
+function drum(t, kind) {
+    const a = sound.ctx;
+    if (kind === 'kick') {
+        const o = a.createOscillator(), g = a.createGain();
+        o.type = 'sine';
+        o.frequency.setValueAtTime(140, t);
+        o.frequency.exponentialRampToValueAtTime(40, t + 0.12);
+        g.gain.setValueAtTime(0.35, t);
+        g.gain.exponentialRampToValueAtTime(0.0001, t + 0.15);
+        o.connect(g).connect(music.bus);
+        o.start(t); o.stop(t + 0.17);
+        return;
+    }
+    if (!noiseBuf) {
+        noiseBuf = a.createBuffer(1, a.sampleRate, a.sampleRate);
+        const d = noiseBuf.getChannelData(0);
+        for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+    }
+    const src = a.createBufferSource(), f = a.createBiquadFilter(), g = a.createGain();
+    src.buffer = noiseBuf;
+    f.type = kind === 'hat' ? 'highpass' : 'bandpass';
+    f.frequency.value = kind === 'hat' ? 7000 : 1800;
+    const dur = kind === 'hat' ? 0.03 : 0.1;
+    g.gain.setValueAtTime(kind === 'hat' ? 0.05 : 0.14, t);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    src.connect(f).connect(g).connect(music.bus);
+    src.start(t, Math.random() * 0.5); src.stop(t + dur + 0.02);
+}
+
+function playStep(step, t) {
+    const [bass, arp] = CHORDS[Math.floor(step / 16)];
+    const s = step % 16;
+    // basse : fondamentale / octave en croches
+    if (s % 2 === 0) voice('triangle', midi(s % 4 === 0 ? bass : bass + 12), t, STEP * 1.8, 0.22);
+    // arpège léger
+    voice('square', midi(arp[s % 4]), t, STEP * 0.9, 0.025);
+    // mélodie
+    const n = LEAD_AT.get(step);
+    if (n) voice('square', midi(n[1]), t, STEP * n[2] * 0.95, 0.05);
+    // batterie
+    if (s === 0 || s === 8 || s === 10) drum(t, 'kick');
+    if (s === 4 || s === 12) drum(t, 'snare');
+    if (s % 2 === 1) drum(t, 'hat');
 }

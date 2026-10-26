@@ -66,6 +66,15 @@ Chaque chargement de page ajoute une ligne à `logs/access-AAAA-MM-JJ.log` : dat
 | `AccessLog__Directory` | `logs` | Dossier des fichiers |
 | `AccessLog__RetentionDays` | `90` | Jours de conservation (`0` = illimité) |
 
+### Hall of Fame
+
+En fin de partie (game over ou victoire), le joueur peut inscrire son pseudo au Hall of Fame. Le pseudo est mémorisé dans un cookie (`bdnet_pseudo`, 1 an). Les scores sont enregistrés sur le serveur dans `data/highscores.json` (meilleur score par joueur, 100 premiers) et tout le monde voit le classement depuis l'écran d'accueil.
+
+- API : `GET /api/scores?top=10`, `POST /api/scores` `{ "name", "score", "level" }`
+- Pseudo : 1 à 16 lettres, chiffres, espaces ou `- _ . ' !`
+- Anti-triche de base : un score supérieur à ce que permet le niveau atteint est refusé, et les envois sont limités à 6 par minute et par IP. Le jeu tourne dans le navigateur, donc un tricheur déterminé peut encore forger un score plausible ; il suffit alors de corriger `highscores.json`.
+- Réglages : `HighScores__File` (défaut `data/highscores.json`), `HighScores__MaxEntries` (défaut `100`).
+
 L'endpoint `/health` répond `{"status":"ok"}` (supervision).
 
 ## Commandes
@@ -77,7 +86,8 @@ L'endpoint `/health` répond `{"status":"ok"}` (supervision).
 | Échap / P | Pause |
 | R (en pause) | Abandonner le niveau (perd une vie) |
 | Entrée | Commencer / passer l'intro |
-| M | Couper / remettre le son |
+| M | Couper / remettre les bruitages |
+| N | Musique 8 bits de l'écran d'accueil (désactivée par défaut, aussi via le bouton 🎵) |
 
 Sur un écran tactile, une croix directionnelle s'affiche automatiquement.
 

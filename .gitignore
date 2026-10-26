@@ -491,3 +491,6 @@ Dockerfile
 docker-compose.yml
 DOCKER.md
 boulderdashnet-docker.zip
+
+# Hall of Fame (données serveur en développement)
+data/

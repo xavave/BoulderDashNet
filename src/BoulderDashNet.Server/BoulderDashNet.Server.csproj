@@ -14,4 +14,10 @@
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
 
+  <ItemGroup>
+    <!-- Données d'exécution (Hall of Fame) : jamais publiées avec l'application -->
+    <Content Remove="data\**" />
+    <None Remove="data\**" />
+  </ItemGroup>
+
 </Project>

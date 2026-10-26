@@ -66,6 +66,15 @@ Each page load appends a line to `logs/access-YYYY-MM-DD.log`: date, client IP, 
 | `AccessLog__Directory` | `logs` | Folder for the log files |
 | `AccessLog__RetentionDays` | `90` | Days to keep log files (`0` = keep forever) |
 
+### Hall of Fame
+
+At the end of a game (game over or victory), players can enter their name in the Hall of Fame. The name is remembered in a cookie (`bdnet_pseudo`, 1 year). Scores are stored on the server in `data/highscores.json` (best score per player, top 100) and everyone can see the leaderboard from the title screen.
+
+- API: `GET /api/scores?top=10`, `POST /api/scores` `{ "name", "score", "level" }`
+- Names: 1 to 16 letters, digits, spaces or `- _ . ' !`
+- Basic anti-cheat: scores above what the reached level makes possible are rejected, and submissions are limited to 6 per minute per IP. The game runs in the browser, so a determined cheater can still forge a plausible score; edit or delete lines in `highscores.json` if needed.
+- Settings: `HighScores__File` (default `data/highscores.json`), `HighScores__MaxEntries` (default `100`).
+
 The `/health` endpoint returns `{"status":"ok"}` for monitoring.
 
 ## Controls
@@ -77,7 +86,8 @@ The `/health` endpoint returns `{"status":"ok"}` for monitoring.
 | Esc / P | Pause |
 | R (while paused) | Give up the level (costs a life) |
 | Enter | Start / skip the intro |
-| M | Mute / unmute |
+| M | Mute / unmute sound effects |
+| N | Title screen 8-bit music on / off (off by default, also a 🎵 button) |
 
 On touch screens, an on-screen D-pad appears automatically.
 

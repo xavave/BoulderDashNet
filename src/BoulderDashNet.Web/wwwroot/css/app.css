@@ -263,3 +263,56 @@ kbd {
 .flag:hover { opacity: .9; }
 .flag:active { transform: scale(.94); }
 .flag.on { opacity: 1; border-color: var(--accent); }
+
+/* Bouton musique (barre du haut) */
+.topbar { gap: 10px; align-items: center; }
+.music-btn {
+    height: 28px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 0 10px;
+    font: 600 13px "Segoe UI", system-ui, sans-serif;
+    color: var(--muted);
+    background: var(--panel-2);
+    border: 2px solid #3a3a58;
+    border-radius: 6px;
+    cursor: pointer;
+    opacity: .7;
+}
+.music-btn:hover { opacity: 1; }
+.music-btn.on { color: var(--accent); border-color: var(--accent); opacity: 1; }
+
+/* Hall of Fame */
+.hof-btn { min-width: 0; padding: 5px 14px; font-size: 14px; }
+.overlay.hof { background: rgba(0, 0, 0, .75); z-index: 5; }
+.overlay.hof .card { max-height: 94%; overflow-y: auto; min-width: min(420px, 90%); }
+table.scores { border-collapse: collapse; width: 100%; font-family: "Courier New", monospace; font-size: clamp(12px, 1.7vw, 16px); }
+table.scores th { color: var(--muted); font-weight: 600; text-align: left; padding: 2px 8px; border-bottom: 1px solid #34344f; }
+table.scores td { padding: 3px 8px; }
+table.scores td.rank { text-align: center; width: 2.5em; }
+table.scores td.name { text-align: left; color: var(--text); font-weight: 700; max-width: 12em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+table.scores td.pts { color: var(--accent); text-align: right; }
+table.scores th:last-child { text-align: right; }
+table.scores tr.me td { background: rgba(255, 210, 63, .14); }
+table.scores tbody tr:nth-child(even) td { background-color: rgba(255, 255, 255, .03); }
+table.scores tbody tr.me:nth-child(even) td { background: rgba(255, 210, 63, .14); }
+
+.submit-score { display: flex; flex-direction: column; gap: 6px; align-items: center; width: 100%; }
+.submit-score label { color: var(--muted); font-size: clamp(12px, 1.5vw, 14px); }
+.submit-score .row { display: flex; gap: 8px; }
+.submit-score input {
+    font: 700 16px "Courier New", monospace;
+    color: var(--text);
+    background: #0b0b14;
+    border: 2px solid #3a3a58;
+    border-radius: 8px;
+    padding: 6px 10px;
+    width: 12em;
+    user-select: text;
+    -webkit-user-select: text;
+}
+.submit-score input:focus { outline: none; border-color: var(--accent); }
+.btn.small { min-width: 0; padding: 6px 14px; }
+.small { font-size: 13px; }
+.rank-msg { color: var(--diamond) !important; font-weight: 700; }
