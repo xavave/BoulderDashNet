@@ -52,6 +52,22 @@ export function loadProgress() {
     } catch { return [0, 0]; }
 }
 
+let lang = 'fr';
+
+export function loadLanguage() {
+    try {
+        const saved = localStorage.getItem('bdnet.lang');
+        if (saved) return saved;
+    } catch { /* stockage indisponible */ }
+    return (navigator.language || 'fr').toLowerCase().startsWith('fr') ? 'fr' : 'en';
+}
+
+export function setLanguage(code) {
+    lang = code === 'en' ? 'en' : 'fr';
+    document.documentElement.lang = lang;
+    try { localStorage.setItem('bdnet.lang', lang); } catch { /* stockage indisponible */ }
+}
+
 export function saveProgress(level, hiscore) {
     try {
         localStorage.setItem('bdnet.level', String(level));
@@ -180,7 +196,7 @@ function drawHud(st) {
     ctx.fillText(`×${st.value}`, 120, y);
 
     ctx.fillStyle = '#9aa4b4';
-    ctx.fillText(`N${st.level}`, 196, y);
+    ctx.fillText(`${lang === 'en' ? 'L' : 'N'}${st.level}`, 196, y);
 
     const low = st.time <= 10 && Math.floor(clock * 4) % 2 === 0;
     ctx.fillStyle = st.time <= 10 ? (low ? '#ff4040' : '#ff9090') : '#ffffff';
@@ -569,6 +585,11 @@ function onPointerUp(e) {
 
 function onCanvasClick() { sound.unlock(); }
 
+function onAnyClick(e) {
+    const b = e.target.closest?.('button');
+    if (b && !b.closest('.touchpad')) b.blur();
+}
+
 function attachInput() {
     window.addEventListener('keydown', onKeyDown);
     window.addEventListener('keyup', onKeyUp);
@@ -577,6 +598,7 @@ function attachInput() {
     document.addEventListener('pointerup', onPointerUp);
     document.addEventListener('pointercancel', onPointerUp);
     canvas.addEventListener('click', onCanvasClick);
+    document.addEventListener('click', onAnyClick);
 }
 
 function detachInput() {
@@ -587,6 +609,7 @@ function detachInput() {
     document.removeEventListener('pointerup', onPointerUp);
     document.removeEventListener('pointercancel', onPointerUp);
     canvas?.removeEventListener('click', onCanvasClick);
+    document.removeEventListener('click', onAnyClick);
 }
 
 // ---------------------------------------------------------------- sons (synthèse WebAudio)

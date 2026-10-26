@@ -20,6 +20,8 @@ public class GameTests
         Assert.Equal(1, cave.Count(TileType.Player));
         Assert.Equal(1, cave.Count(TileType.Exit));
         Assert.True(cave.PlayerAlive);
+        Assert.False(string.IsNullOrWhiteSpace(def.NameEn), $"{def.Name} : nom anglais manquant");
+        Assert.False(string.IsNullOrWhiteSpace(def.HintEn), $"{def.Name} : astuce anglaise manquante");
         Assert.True(cave.Count(TileType.Diamond) >= def.DiamondsRequired,
             $"{def.Name}: {cave.Count(TileType.Diamond)} diamants pour {def.DiamondsRequired} requis");
         for (var x = 0; x < def.Width; x++)

@@ -1,0 +1,31 @@
+@* Sélecteur de langue : drapeaux en SVG (les émojis drapeaux ne s'affichent pas sous Windows). *@
+
+<div class="langs" role="group" aria-label="@Texts.Get(Current, "language")">
+    <button type="button" class="flag @(Current == Lang.Fr ? "on" : "")" title="Français" aria-label="Français"
+            aria-pressed="@(Current == Lang.Fr)" @onclick="() => Changed.InvokeAsync(Lang.Fr)">
+        <svg viewBox="0 0 3 2" aria-hidden="true">
+            <rect width="1" height="2" x="0" fill="#002395" />
+            <rect width="1" height="2" x="1" fill="#fff" />
+            <rect width="1" height="2" x="2" fill="#ed2939" />
+        </svg>
+    </button>
+    <button type="button" class="flag @(Current == Lang.En ? "on" : "")" title="English" aria-label="English"
+            aria-pressed="@(Current == Lang.En)" @onclick="() => Changed.InvokeAsync(Lang.En)">
+        <svg viewBox="0 0 60 30" aria-hidden="true">
+            <clipPath id="uk-s"><path d="M0,0 v30 h60 v-30 z" /></clipPath>
+            <clipPath id="uk-t"><path d="M30,15 h30 v15 z v15 h-30 z h-30 v-15 z v-15 h30 z" /></clipPath>
+            <g clip-path="url(#uk-s)">
+                <path d="M0,0 v30 h60 v-30 z" fill="#012169" />
+                <path d="M0,0 L60,30 M60,0 L0,30" stroke="#fff" stroke-width="6" />
+                <path d="M0,0 L60,30 M60,0 L0,30" clip-path="url(#uk-t)" stroke="#C8102E" stroke-width="4" />
+                <path d="M30,0 v30 M0,15 h60" stroke="#fff" stroke-width="10" />
+                <path d="M30,0 v30 M0,15 h60" stroke="#C8102E" stroke-width="6" />
+            </g>
+        </svg>
+    </button>
+</div>
+
+@code {
+    [Parameter] public Lang Current { get; set; }
+    [Parameter] public EventCallback<Lang> Changed { get; set; }
+}

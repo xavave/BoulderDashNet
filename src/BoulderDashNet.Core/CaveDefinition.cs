@@ -7,6 +7,10 @@ public sealed class CaveDefinition
 {
     public required string Name { get; init; }
     public string Hint { get; init; } = "";
+    /// <summary>Nom anglais (facultatif ; <see cref="Name"/> sinon).</summary>
+    public string? NameEn { get; init; }
+    /// <summary>Astuce en anglais (facultative ; <see cref="Hint"/> sinon).</summary>
+    public string? HintEn { get; init; }
     public int Width { get; init; } = 40;
     public int Height { get; init; } = 22;
     public int DiamondsRequired { get; init; } = 10;

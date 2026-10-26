@@ -12,7 +12,9 @@ public static class Levels
         new()
         {
             Name = "Premiers pas",
+            NameEn = "First steps",
             Hint = "Ramassez 10 diamants puis rejoignez la sortie. Attention aux rochers qui tombent !",
+            HintEn = "Collect 10 diamonds, then head for the exit. Watch out for falling boulders!",
             DiamondsRequired = 10, DiamondValue = 10, ExtraDiamondValue = 15, TimeSeconds = 150,
             Map =
             [
@@ -43,7 +45,9 @@ public static class Levels
         new()
         {
             Name = "Les galeries",
+            NameEn = "The galleries",
             Hint = "Les rochers roulent sur les murs de briques. Creusez avec prudence.",
+            HintEn = "Boulders roll off brick walls. Dig carefully.",
             DiamondsRequired = 15, DiamondValue = 10, ExtraDiamondValue = 20, TimeSeconds = 150, Seed = 2024,
             Build = b =>
             {
@@ -58,7 +62,9 @@ public static class Levels
         new()
         {
             Name = "Lucioles",
+            NameEn = "Fireflies",
             Hint = "Les lucioles longent les parois. Touchez-en une et c'est l'explosion ! Écrasez-les sous un rocher.",
+            HintEn = "Fireflies follow the walls. Touch one and it explodes! Crush them with a boulder.",
             DiamondsRequired = 18, DiamondValue = 10, ExtraDiamondValue = 20, TimeSeconds = 160, Seed = 77,
             Build = b =>
             {
@@ -75,7 +81,9 @@ public static class Levels
         new()
         {
             Name = "Papillons",
+            NameEn = "Butterflies",
             Hint = "Un papillon écrasé se transforme en 9 diamants. Faites-leur tomber un rocher dessus.",
+            HintEn = "A crushed butterfly turns into 9 diamonds. Drop a boulder on them.",
             DiamondsRequired = 22, DiamondValue = 15, ExtraDiamondValue = 25, TimeSeconds = 170, Seed = 1337,
             Build = b =>
             {
@@ -94,7 +102,9 @@ public static class Levels
         new()
         {
             Name = "Le mur magique",
+            NameEn = "The magic wall",
             Hint = "Un rocher qui traverse le mur magique devient diamant… tant que le mur est actif.",
+            HintEn = "A boulder falling through the magic wall becomes a diamond… while the wall is active.",
             DiamondsRequired = 20, DiamondValue = 10, ExtraDiamondValue = 20, TimeSeconds = 160,
             MagicWallSeconds = 25, Seed = 4242,
             Build = b =>
@@ -113,7 +123,9 @@ public static class Levels
         new()
         {
             Name = "L'amibe",
+            NameEn = "The amoeba",
             Hint = "L'amibe grandit sans cesse. Enfermée, elle devient diamants ; trop grosse, elle se pétrifie en rochers.",
+            HintEn = "The amoeba keeps growing. Enclosed, it turns into diamonds; too big, it hardens into boulders.",
             DiamondsRequired = 16, DiamondValue = 10, ExtraDiamondValue = 30, TimeSeconds = 180,
             AmoebaSlowSeconds = 45, AmoebaMaxSize = 120, Seed = 99,
             Build = b =>
@@ -132,7 +144,9 @@ public static class Levels
         new()
         {
             Name = "Le grand final",
+            NameEn = "The grand finale",
             Hint = "Tout ce que vous avez appris, en plus rapide. Bonne chance, mineur !",
+            HintEn = "Everything you have learned, only faster. Good luck, miner!",
             DiamondsRequired = 30, DiamondValue = 15, ExtraDiamondValue = 30, TimeSeconds = 220,
             TickSeconds = 0.115, MagicWallSeconds = 20, Seed = 31337,
             Build = b =>

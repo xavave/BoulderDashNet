@@ -35,7 +35,7 @@ html, body {
 
 .screen {
     position: relative;
-    width: min(100%, calc((100vh - 110px) * 640 / 416));
+    width: min(100%, calc((100vh - 150px) * 640 / 416));
     aspect-ratio: 640 / 416;
     border: 3px solid #2a2a40;
     border-radius: 6px;
@@ -239,3 +239,27 @@ kbd {
     z-index: 1000;
 }
 #blazor-error-ui .dismiss { cursor: pointer; position: absolute; right: 0.75rem; top: 0.5rem; }
+
+/* Sélecteur de langue */
+.topbar {
+    width: min(100%, calc((100vh - 150px) * 640 / 416));
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: -6px;
+}
+.langs { display: flex; gap: 8px; }
+.flag {
+    width: 40px;
+    height: 28px;
+    padding: 3px;
+    border: 2px solid #3a3a58;
+    border-radius: 6px;
+    background: var(--panel-2);
+    cursor: pointer;
+    opacity: .55;
+    transition: opacity .15s, border-color .15s, transform .08s;
+}
+.flag svg { display: block; width: 100%; height: 100%; border-radius: 2px; }
+.flag:hover { opacity: .9; }
+.flag:active { transform: scale(.94); }
+.flag.on { opacity: 1; border-color: var(--accent); }

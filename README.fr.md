@@ -5,6 +5,8 @@
 Hommage en **.NET 10 / Blazor WebAssembly** aux classiques Amiga **Boulder Dash** et **Emerald Mine**.
 Toute la logique du jeu est écrite en C#. Elle tourne dans le navigateur via WebAssembly, et le rendu se fait sur un `<canvas>` en pixel art généré par le code (aucun asset externe).
 
+> Le jeu est disponible en français et en anglais : boutons drapeaux au-dessus de l'écran de jeu. La langue est détectée depuis le navigateur à la première visite, puis mémorisée.
+
 <p align="center">
   <img src="docs/screenshots/title.png" alt="Écran titre" width="720">
 </p>

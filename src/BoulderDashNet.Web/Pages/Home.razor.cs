@@ -21,6 +21,9 @@ public partial class Home : IAsyncDisposable
     private byte[] _buffer = [];
     private int _unlockedLevel;
     private int _highScore;
+    private Lang _lang = Lang.Fr;
+
+    private string L(string key) => Texts.Get(_lang, key);
 
     private GameState State => _game.State;
     private CaveDefinition? CurrentLevel => _game.Cave?.Definition;
@@ -32,8 +35,10 @@ public partial class Home : IAsyncDisposable
         var progress = await _module.InvokeAsync<int[]>("loadProgress");
         _unlockedLevel = Math.Clamp(progress[0], 0, _game.LevelList.Count - 1);
         _highScore = progress[1];
+        _lang = Texts.Parse(await _module.InvokeAsync<string>("loadLanguage"));
         _selfRef = DotNetObjectReference.Create(this);
         await _module.InvokeVoidAsync("start", _selfRef, _canvas, _game.ViewWidth, _game.ViewHeight);
+        await _module.InvokeVoidAsync("setLanguage", Texts.Code(_lang));
         StateHasChanged();
     }
 
@@ -125,6 +130,13 @@ public partial class Home : IAsyncDisposable
         _game.GiveUp();
     }
     private void Menu() => _game.BackToTitle();
+
+    private async Task SetLanguage(Lang lang)
+    {
+        _lang = lang;
+        if (_module is not null)
+            await _module.InvokeVoidAsync("setLanguage", Texts.Code(lang));
+    }
 
     public async ValueTask DisposeAsync()
     {
